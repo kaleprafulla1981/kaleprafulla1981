@@ -1,0 +1,43 @@
+# Selected model. SmolLM2-135M-Instruct is small enough to fine-tune on a CPU.
+# Switch the whole file for Qwen by using configs/qwen2.5-0.5b-instruct.yaml.
+model:
+  name: HuggingFaceTB/SmolLM2-135M-Instruct
+  torch_dtype: float32
+  trust_remote_code: false
+  load_in_4bit: false
+
+data:
+  train_file: data/sample/train.jsonl
+  eval_file: data/sample/eval.jsonl
+  max_length: 512
+
+# r=16 and 25 epochs fit the 12-row sample on CPU. For a larger corpus,
+# lower the learning rate toward 2e-4 and train fewer passes over the data.
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.0
+  target_modules: all-linear
+
+train:
+  output_dir: runs/smollm2-harborline
+  num_train_epochs: 25
+  max_steps: -1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 1
+  learning_rate: 0.001
+  weight_decay: 0.0
+  warmup_ratio: 0.0
+  logging_steps: 5
+  save_strategy: "no"
+  eval_strategy: "no"
+  gradient_checkpointing: false
+  seed: 7
+
+query:
+  max_new_tokens: 80
+  temperature: 0.0
+  top_p: 0.9
+  system_prompt: >-
+    You are Harborline, the policy assistant for Harborline Logistics.
+    Answer only from Harborline policy. If a rule is not in the policy, say so.
